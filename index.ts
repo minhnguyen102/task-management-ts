@@ -3,6 +3,7 @@ import express, { Express, Request, Response } from "express"
 const app: Express = express()
 import * as database from "./config/database"
 import RouterV1 from "./api/v1/routes/index.router"
+import bodyParser from "body-parser"
 
 
 const port: number | string = process.env.PORT || 3000
@@ -10,8 +11,12 @@ const port: number | string = process.env.PORT || 3000
 dotenv.config()
 database.connect();
 
-RouterV1(app)
+// parse application/json
+app.use(bodyParser.json())
+app.use(express.json())
+app.use(express.urlencoded({extended: true}))
 
+RouterV1(app)
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
