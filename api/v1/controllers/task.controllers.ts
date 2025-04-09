@@ -52,6 +52,7 @@ export const index = async (req: Request, res: Response) => {
                             .skip(objectPagination.skip);
     res.json(tasks)
 }
+
 // {{BASE_URL}}/api/v1/tasks/detail/:id
 export const detail = async (req: Request, res: Response) => {
     const id = req.params.id;
@@ -61,6 +62,7 @@ export const detail = async (req: Request, res: Response) => {
     })
     res.json(task)
 }
+
 // {{BASE_URL}}/api/v1/tasks/change-status/:status/:id
 export const changeStatus = async(req: Request, res: Response) => {
     const newStatus = req.params.status;
@@ -75,12 +77,17 @@ export const changeStatus = async(req: Request, res: Response) => {
         message : "Cập nhật trạng thái thành công"
     })
 }
+
 // {{BASE_URL}}/api/v1/tasks/change-multi
 export const changeMulti = async (req: Request, res: Response) => {
     try {
+        enum Key {
+            STATUS = "status",
+            DELETE = "delete"
+        }
         const {ids, key, value} = req.body;
         switch (key) {
-            case "status":
+            case Key.STATUS:
                 await Task.updateMany(
                     {_id : {$in : ids}},
                     {$set : {
@@ -90,6 +97,19 @@ export const changeMulti = async (req: Request, res: Response) => {
                 res.json({
                     code : 200,
                     message : "Cập nhật thành công"
+                })
+                break;
+
+            case Key.DELETE:
+                await Task.updateMany(
+                    {_id : {$in : ids}},
+                    {$set : {
+                        deleted : true
+                    }}
+                )
+                res.json({
+                    code : 200,
+                    message : "Xóa thành công"
                 })
                 break;
         
@@ -138,6 +158,26 @@ export const edit = async (req: Request, res: Response) => {
         res.json({
             code : 400,
             message : "Lỗi"
+        })
+    }
+}
+
+// {{BASE_URL}}/api/v1/tasks/delete/:id
+export const deleteTask = async (req: Request, res: Response) => {
+    try {
+        const id = req.params.id;
+        await Task.updateOne(
+            {_id : id},
+            {deleted : true}
+        )
+        res.json({
+            code : 200,
+            message : "Xóa task công việc thành công"
+        })
+    } catch (error) {
+        res.json({
+            code : 400,
+            message : "Xóa task công việc thất bại"
         })
     }
 }
