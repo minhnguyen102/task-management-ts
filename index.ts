@@ -1,6 +1,7 @@
 import dotenv from "dotenv"
 import express, { Express, Request, Response } from "express"
 const app: Express = express()
+import cors from "cors"
 import * as database from "./config/database"
 import RouterV1 from "./api/v1/routes/index.router"
 import bodyParser from "body-parser"
@@ -15,6 +16,8 @@ database.connect();
 app.use(bodyParser.json())
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
+
+app.use(cors())
 
 RouterV1(app)
 
