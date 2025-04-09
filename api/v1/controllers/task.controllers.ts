@@ -1,5 +1,6 @@
 import Task from "../models/task.model"
 import { Request, Response } from "express"
+import { paginationHelper } from "../../../helpers/pagination"
 
 export const index = async (req: Request, res: Response) => {
     let find = {
@@ -9,11 +10,32 @@ export const index = async (req: Request, res: Response) => {
     if(req.query.status){
         find["status"] = req.query.status;
     }
+    // Hết Bộ lọc theo trạng thái
+
     // Sắp xếp theo tiêu chí 
     let sort = {};
-    sort[req.query.sortKey.toString()] = req.query.sortValue.toString();
+    if(req.query.sortKey && req.query.sortValue){
+        sort[req.query.sortKey.toString()] = req.query.sortValue.toString();
+    }
+    // Hết Sắp xếp theo tiêu chí 
 
-    const tasks = await Task.find(find).sort(sort);
+    // Phân trang
+    const totalTask = await Task.countDocuments(find)
+    let objectPagination = paginationHelper(
+        {
+            currentPage : 1,
+            limitItem : 4
+        },
+        req.query,
+        totalTask
+    )
+
+    // Hết Phân trang
+
+    const tasks = await Task.find(find)
+                            .sort(sort)
+                            .limit(objectPagination.limitItem)
+                            .skip(objectPagination.skip);
     res.json(tasks)
 }
 
