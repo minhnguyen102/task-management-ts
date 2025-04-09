@@ -5,7 +5,7 @@ interface Pagination {
     totalPage?: number
 }
 
-export const paginationHelper = (objectPagination: Pagination, query, totalTask: number) => {
+export const paginationHelper = (objectPagination: Pagination, query: Record<string, any>, totalTask: number): Pagination => {
     if(query.page){
         objectPagination.currentPage = parseInt(query.page);
     }

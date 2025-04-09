@@ -1,14 +1,20 @@
 import Task from "../models/task.model"
 import { Request, Response } from "express"
 import { paginationHelper } from "../../../helpers/pagination"
+import searchHelper from "../../../helpers/search"
 
 export const index = async (req: Request, res: Response) => {
-    let find = {
-        deleted : false
+    interface Find {
+        deleted: boolean,
+        status?: string,
+        title?: RegExp
+    }
+    let find: Find = {
+        deleted : false,
     }
     // Bộ lọc theo trạng thái
     if(req.query.status){
-        find["status"] = req.query.status;
+        find["status"] = req.query.status.toString();
     }
     // Hết Bộ lọc theo trạng thái
 
@@ -29,8 +35,14 @@ export const index = async (req: Request, res: Response) => {
         req.query,
         totalTask
     )
-
     // Hết Phân trang
+
+    // Tìm kiếm 
+    const objectSearch = searchHelper(req.query);
+    if(objectSearch.regex){
+        find.title = objectSearch.regex;
+    }
+    // Hết Tìm kiếm 
 
     const tasks = await Task.find(find)
                             .sort(sort)
